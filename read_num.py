@@ -1,4 +1,5 @@
 import numpy as np
+import heapq 
 # file_num: how many num of files we want to process
 # test_num: which num are we testing
 # train_test: train for 1 test for 0
@@ -147,35 +148,71 @@ def test_data_3d():
 	# print(data_3d[0]);
 	return data_3d
 
-def com_3d():
+#-----------------------------version 2.4-----------------------------------------
+# num_test: which number do we wanna test
+# num_data_base: which data base do we want to search 
+# num_test_file: which test file do we want to checkout?
+def com_3d(num_test,num_data_base, num_test_file):
 	file_num_test = 85;
 	file_num_train = 180;
-	num_test = 1;
-
+	# num_test = 0;
+	# num_data_base = 9;
 	tra_3d = train_data_3d();
 	tes_3d = test_data_3d();
 	result_3d = np.zeros((file_num_test,file_num_train,30));
 	# print (tes_3d[0][0]);
 	for i in range(file_num_test):
 		for j in range(file_num_train):
-			result_3d[i][j] =  tra_3d[num_test][j] - tes_3d[num_test][i];
+			result_3d[i][j] =  abs(tra_3d[num_data_base][j] - tes_3d[num_test][i]);
 			result_3d[i][j] =  np.divide(result_3d[i][j], tes_3d[num_test][i]);
 
 	result_rate = np.zeros(file_num_train);		
-	for i in range(file_num_train):
-		result_rate[i] =  np.sum(result_3d[56][i]) / 30
+	for k in range(file_num_train):
+		result_rate[k] =  np.sum(result_3d[num_test_file][k]) / 30
 
-	print (np.sum(result_rate)/file_num_train);
-	# print(result_2d[0][1]);				
+	# print(result_rate);
+	avg = (np.sum(result_rate)/file_num_train);
+	# print ('data base {}:{}'.format(num_data_base,avg));
+	return avg;
+
+#-----------------------------version 2.4-----------------------------------------
+# determine if we can recognize the correct 
+def deter(res,num):
+	ind = np.zeros(3); 
+	ind = heapq.nsmallest(3, range(len(res)), key=res.__getitem__);
+
+	if ind[0] == num:
+		return True;
+	elif ind[1] == num:
+		return True
+	elif ind[2] == num:
+		return True
+	else:
+		return False
 
 
 
-com_3d();
-print();
-print();
-print();
-# com_data(1,1,179);
+
+#-----------------------------main-----------------------------------------			
+result = np.zeros(10);
+count = 0; 
+for k in range(85):
+	print('we are testing on test file num: {}'.format(k));
+	for j in range(10):
+		print('we are testing number: {}'.format(j));
+		for i in range(10):
+			result[i] =  com_3d(j,i,k);
+		if deter(result, j) == True:
+			count+=1;
+			# print(count)
+		print();
+
+print(count)
+
+
+
 # x= np.array([1,3,5,7,9,11,15,17]);
+# print(deter(x,7));
 # cut_chunk(x,4);
 
 
