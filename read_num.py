@@ -13,8 +13,8 @@ def read_int(file_num, test_num, train_test):
 
 	files = open(path+str(test_num)+'_'+str(file_num)+'.txt');
 	#print(files.name);
-	line_num = np.zeros(32)
-	while(num_line < 32):
+	line_num = np.zeros(30)
+	while(num_line < 30):
 		line = files.readline();
 		if len(line) == 0:
 			break
@@ -29,15 +29,18 @@ def read_int(file_num, test_num, train_test):
 	return line_num;
 
 #----------------------------------------------------------------------
-def train_2d_num(num,num_file):
+#num: number we want to recognize
+#num_file: nums of files
+#tra_te: 1 for train; 0 for test
+def train_test_2d_num(num,num_file, tra_te):
 # num = 0;
 # count = 0;
 # num_file = 180;
 # create a 2d array to store all the data
-	data_2d = np.zeros((num_file,32))
+	data_2d = np.zeros((num_file,30))
 
 	for i in range(num_file):
-		data_2d[i] = read_int(i,num,1)
+		data_2d[i] = read_int(i,num,tra_te)
 	# print(data_2d)
 	return data_2d;
 
@@ -47,7 +50,7 @@ def train_2d_num(num,num_file):
 #num: which num are we testing
 #num_file: which file are testing
 def test_1d_num(num,num_file):
-	data = np.zeros(32) 
+	data = np.zeros(30) 
 	data = read_int(num_file,num,0)
 	return data;
 #----------------------------------------------------------------------
@@ -70,14 +73,17 @@ def cut_chunk(ary, num_chunks):
 #num_rec: which number are we tring to recognize
 #file_num: which file number we are trying to recgnize
 #file_num_train: how many train txt file are we included?
-def com_data(num_rec,file_num, file_num_train):
+def com_data(num_rec,file_num, file_num_train, file_num_test):
 	# file_num_train = 180
-	num_chunks = 32
-	data_2d = train_2d_num(num_rec,file_num_train);
+	num_chunks = 30
+	data_2d = train_test_2d_num(num_rec,file_num_train, 1);
 	# print(data_2d[0])
 	# print(data_2d[1])
 	# array size 32
-	data  = test_1d_num(0,file_num);
+	#  num_rec 0_0 first 0
+	#  file_num 0_0 second zero 
+	data = test_1d_num(num_rec,file_num);
+
 	# print(data);
 	sum_data_train = np.zeros((file_num_train,num_chunks));
 
@@ -101,7 +107,70 @@ def com_data(num_rec,file_num, file_num_train):
 	#for every element in the list -> over 100? delete then sum the rest -> find the average
 	print(result_rate)
 
-com_data(1, 1,180);
+
+
+#-----------------------------version 2-----------------------------------------
+def train_data_2d(num_rec, file_num_train):
+	# # file_num_train = 180
+	# num_chunks = 32
+	# train data 2d [numof files][32lines decimal] - tested
+	data_2d_train = train_test_2d_num(num_rec,file_num_train, 1);	
+	# print(data_2d_train);
+	return data_2d_train;
+
+
+def test_data_2d(num_rec,file_num_test):	
+	# test data 2d [numof files][32lines decimal] - tested
+	data_2d_test = train_test_2d_num(num_rec, file_num_test, 0);
+	# print(data_2d_test);
+	return data_2d_test
+
+#doing 10*180*32 matrix 
+def train_data_3d():
+	num = 10
+	file_num_train = 180;
+	num_chunks = 30;
+	data_3d = np.zeros((10,file_num_train, num_chunks));
+	for i in range(10):
+		data_3d[i] = train_data_2d(i,file_num_train)
+	return data_3d
+	# print(data_3d[]);
+
+#doing 10*85*32 matrix
+def test_data_3d():
+	num = 10
+	file_num_test = 85;
+	num_chunks = 30;
+	data_3d = np.zeros((10,file_num_test, num_chunks));
+	for i in range(10):
+		data_3d[i] = test_data_2d(i,file_num_test)
+	# print(data_3d[0]);
+	return data_3d
+
+def com_3d():
+	file_num_test = 85;
+	file_num_train = 180;
+	num_test = 1;
+
+	tra_3d = train_data_3d();
+	tes_3d = test_data_3d();
+	result_3d = np.zeros((file_num_test,file_num_train,30));
+	# print (tes_3d[0][0]);
+	for i in range(file_num_test):
+		for j in range(file_num_train):
+			result_3d[i][j] =  tra_3d[num_test][j] - tes_3d[num_test][i];
+			result_3d[i][j] =  np.divide(result_3d[i][j], tes_3d[num_test][i]);
+
+	result_rate = np.zeros(file_num_train);		
+	for i in range(file_num_train):
+		result_rate[i] =  np.sum(result_3d[56][i]) / 30
+
+	print (np.sum(result_rate)/file_num_train);
+	# print(result_2d[0][1]);				
+
+
+
+com_3d();
 print();
 print();
 print();
